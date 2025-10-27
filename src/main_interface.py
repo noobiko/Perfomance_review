@@ -11,7 +11,7 @@ class MainInterface:
         self.current_user = current_user
         
         self.create_interface()
-        #self.load_employees()
+        self.load_employees()
     
     def create_interface(self):
         """Создание основного интерфейса"""
@@ -115,6 +115,26 @@ class MainInterface:
 
     def setup_recommendations_tab(self):
         """Настройка вкладки рекомендаций"""
+
+
+    def load_employees(self):
+        """Загрузка списка сотрудников в комбобокс"""
+        try:
+            employees = self.db.get_all_employees()
+            employee_names = [emp['display_name'] for emp in employees]
+            self.employee_combo.configure(values=employee_names)
+            if employee_names:
+                self.employee_combo.set(employee_names[0])
+            self.employees_data = employees  # Сохраняем данные для поиска ID
+        except Exception as e:
+            messagebox.showerror("Ошибка", f"Не удалось загрузить сотрудников: {str(e)}")
+    
+    def get_employee_id_from_name(self, display_name):
+        """Получение ID сотрудника по отображаемому имени"""
+        for emp in self.employees_data:
+            if emp['display_name'] == display_name:
+                return emp['id']
+        return None
     
     def logout(self):
         """Выход из системы"""

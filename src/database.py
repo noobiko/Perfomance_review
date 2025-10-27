@@ -19,6 +19,7 @@ class DatabaseManager:
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 username TEXT UNIQUE NOT NULL,
                 password_hash TEXT NOT NULL,
+                role TEXT NOT NULL DEFAULT 'user',
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         ''')
@@ -55,9 +56,18 @@ class DatabaseManager:
                 FOREIGN KEY (employee_id) REFERENCES employees (id)
             )
         ''')
-        
+        cursor.execute("SELECT COUNT(*) FROM users")
+        if cursor.fetchone()[0] == 0:
+            self.add_sample_users(cursor)
+
+        cursor.execute("SELECT COUNT(*) FROM employees")
+        if cursor.fetchone()[0] == 0:
+            self.add_sample_employees(cursor)
+
         conn.commit()
         conn.close()
+
+
     
 
     def create_user(self, username, password_hash):
@@ -74,6 +84,38 @@ class DatabaseManager:
             return False, "Пользователь с таким именем уже существует"
         finally:
             conn.close()
+
+    def add_sample_employees(self, cursor):
+        """Добавление тестовых сотрудников"""
+        sample_employees = [
+            ("ivanov@company.com", "Иван", "Иванов", "Разработчик", "IT", "2023-01-15", 1),
+            ("petrov@company.com", "Петр", "Петров", "Менеджер", "Продажи", "2022-03-20", 1),
+            ("sidorova@company.com", "Мария", "Сидорова", "Аналитик", "Аналитика", "2023-06-10", 1),
+            ("smirnov@company.com", "Алексей", "Смирнов", "Дизайнер", "Дизайн", "2022-11-05", 1),
+        ]
+        
+        for emp in sample_employees:
+            cursor.execute('''
+                INSERT INTO employees 
+                (email, first_name, last_name, position, department, hire_date, manager_id, created_by, created_date)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (*emp, 1, datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+
+    def add_sample_users(self, cursor):
+        """Добавление тестовых пользователей"""
+        # Администратор
+        admin_hash = hashlib.sha256("admin123".encode()).hexdigest()
+        cursor.execute(
+            "INSERT INTO users (username, password_hash, role) VALUES (?, ?, ?)",
+            ("admin", admin_hash, "admin")
+        )
+        
+        # Обычный пользователь
+        user_hash = hashlib.sha256("user123".encode()).hexdigest()
+        cursor.execute(
+            "INSERT INTO users (username, password_hash, role) VALUES (?, ?, ?)",
+            ("user", user_hash, "user")
+        )
     
     def get_user(self, username):
         conn = sqlite3.connect(self.db_name)
@@ -87,6 +129,31 @@ class DatabaseManager:
                 'id': user[0],
                 'username': user[1],
                 'password_hash': user[2],
-                'created_at': user[3]
+                'role': user[3],
+                'created_at': user[4]
             }
         return None
+    
+    def get_all_employees(self):
+        """Получение всех сотрудников"""
+        conn = sqlite3.connect(self.db_name)
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT id, first_name, last_name, position, department 
+            FROM employees 
+            ORDER BY last_name, first_name
+        ''')
+        employees = cursor.fetchall()
+        conn.close()
+        
+        return [
+            {
+                'id': emp[0],
+                'first_name': emp[1],
+                'last_name': emp[2],
+                'position': emp[3],
+                'department': emp[4],
+                'display_name': f"{emp[1]} {emp[2]} ({emp[3]})"
+            }
+            for emp in employees
+        ]

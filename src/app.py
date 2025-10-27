@@ -4,6 +4,7 @@ from auth import AuthManager
 from database import DatabaseManager
 from login import LoginWindow
 from main_interface import MainInterface
+from main_interface_admin import AdminInterface
 
 class MainApplication:
     def __init__(self, root):
@@ -32,8 +33,12 @@ class MainApplication:
         for widget in self.root.winfo_children():
             widget.destroy()
         
-        # Создаем главный интерфейс
-        MainInterface(self.root, self.db, user_data)
+         # Создаем соответствующий интерфейс в зависимости от роли
+        if user_data['role'] == 'admin':
+            AdminInterface(self.root, self.db, user_data)
+        else:
+            MainInterface(self.root, self.db, user_data)
+        
 
 if __name__ == "__main__":
     root = ctk.CTk()
