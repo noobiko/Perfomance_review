@@ -22,7 +22,7 @@ class MainInterface:
         
         self.goals_frame = self.notebook.add("Цели")
         self.valuation_frame = self.notebook.add("Оценки")
-        self.recommendations_frame = self.notebook.add("Оценки")
+        self.recommendations_frame = self.notebook.add("Рекомендации")
         
         self.setup_goals_tab()
         self.setup_valuation_tab()
@@ -114,7 +114,7 @@ class MainInterface:
         """Настройка вкладки оценок"""
 
     def setup_recommendations_tab(self):
-        """Настройка вкладки рекоммендаций"""
+        """Настройка вкладки рекомендаций"""
     
     def logout(self):
         """Выход из системы"""
