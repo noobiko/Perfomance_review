@@ -21,8 +21,12 @@ class MainInterface:
         self.notebook.pack(fill='both', expand=True, padx=10, pady=10)
         
         self.goals_frame = self.notebook.add("Цели")
+        self.valuation_frame = self.notebook.add("Оценки")
+        self.recommendations_frame = self.notebook.add("Оценки")
         
         self.setup_goals_tab()
+        self.setup_valuation_tab()
+        self.setup_recommendations_tab()
     
     def create_menu(self):
         """Создание меню"""
@@ -105,6 +109,12 @@ class MainInterface:
         # Настройка растягивания
         add_frame.columnconfigure(1, weight=1)
         add_frame.columnconfigure(3, weight=1)
+
+    def setup_valuation_tab(self):
+        """Настройка вкладки оценок"""
+
+    def setup_recommendations_tab(self):
+        """Настройка вкладки рекоммендаций"""
     
     def logout(self):
         """Выход из системы"""
