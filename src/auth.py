@@ -9,13 +9,13 @@ class AuthManager:
         """Хеширование пароля"""
         return hashlib.sha256(password.encode()).hexdigest()
     
-    def register_user(self, username, password):
+    def register_user(self, username, password, role="user"):
         """Регистрация нового пользователя"""
         if len(password) < 4:
             return False, "Пароль должен содержать минимум 4 символа"
         
         password_hash = self.hash_password(password)
-        return self.db.create_user(username, password_hash)
+        return self.db.create_user(username, password_hash, role)
     
     def login_user(self, username, password):
         """Аутентификация пользователя"""

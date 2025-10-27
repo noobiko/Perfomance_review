@@ -12,6 +12,7 @@ class MainInterface:
         
         self.create_interface()
         self.load_employees()
+        self.load_goals()
     
     def create_interface(self):
         """Создание основного интерфейса"""
@@ -33,8 +34,15 @@ class MainInterface:
         menubar = ctk.CTkFrame(self.root, height=30)
         menubar.pack(fill='x', padx=10, pady=5)
         
-        user_menu = ctk.CTkButton(menubar, text=f"Пользователь ({self.current_user['username']})", 
-                                 command=self.logout, width=200)
+        # Получаем информацию о сотруднике
+        employee_info = ""
+        if self.current_user.get('employee_info'):
+            emp = self.current_user['employee_info']
+            employee_info = f" - {emp['full_name']} ({emp['position']})"
+        
+        user_menu = ctk.CTkButton(menubar, 
+                                text=f"Пользователь: {self.current_user['username']}{employee_info}", 
+                                command=self.logout, width=300)
         user_menu.pack(side='left', padx=5)
 
     def setup_goals_tab(self):
@@ -82,7 +90,7 @@ class MainInterface:
         self.goal_progress.grid(row=5, column=3, padx=5, pady=5, sticky="w")
         
         # Кнопка добавления
-        #ctk.CTkButton(add_frame, text="Добавить цель", command=self.add_goal).grid(row=6, column=1, columnspan=2, pady=10)
+        ctk.CTkButton(add_frame, text="Добавить цель", command=self.add_goal).grid(row=6, column=1, columnspan=2, pady=10)
         
         # Таблица целей
         tree_frame = ctk.CTkFrame(self.goals_frame)
@@ -103,8 +111,9 @@ class MainInterface:
         self.goals_tree.pack(side='left', fill='both', expand=True)
         scrollbar.pack(side='right', fill='y')
         
-        # Кнопка обновления
-        #ctk.CTkButton(self.goals_frame, text="Обновить список", command=self.load_goals).pack(pady=5)
+        # Кнопка обновления таблицы
+        ctk.CTkButton(self.goals_frame, text="Обновить список", command=self.load_goals).pack(pady=5)
+        
         
         # Настройка растягивания
         add_frame.columnconfigure(1, weight=1)
@@ -135,6 +144,107 @@ class MainInterface:
             if emp['display_name'] == display_name:
                 return emp['id']
         return None
+    
+    def add_goal(self):
+        """Добавление новой цели"""
+        if not self.validate_goal_data():
+            return
+        
+        employee_display_name = self.employee_var.get()
+        employee_id = self.get_employee_id_from_name(employee_display_name)
+        
+        if not employee_id:
+            messagebox.showerror("Ошибка", "Выберите сотрудника")
+            return
+        
+        success, message = self.db.create_goal(
+            employee_id=employee_id,
+            title=self.goal_title.get().strip(),
+            description=self.goal_description.get('1.0', 'end').strip(),
+            expected_result=self.expected_result.get('1.0', 'end').strip(),
+            deadline=self.goal_deadline.get().strip(),
+            task_link=self.task_link.get().strip(),
+            status=self.goal_status.get(),
+            progress=int(self.goal_progress.get()),
+            created_by=self.current_user['id']
+        )
+        
+        if success:
+            messagebox.showinfo("Успех", message)
+            self.clear_form()
+            self.load_goals()
+        else:
+            messagebox.showerror("Ошибка", message)
+
+    def validate_goal_data(self):
+        """Валидация данных цели"""
+        if not self.employee_var.get():
+            messagebox.showwarning("Предупреждение", "Выберите сотрудника")
+            return False
+        
+        if not self.goal_title.get().strip():
+            messagebox.showwarning("Предупреждение", "Введите название цели")
+            return False
+        
+        if not self.expected_result.get('1.0', 'end').strip():
+            messagebox.showwarning("Предупреждение", "Введите ожидаемый результат")
+            return False
+        
+        if not self.goal_deadline.get().strip():
+            messagebox.showwarning("Предупреждение", "Введите срок выполнения")
+            return False
+        
+        try:
+            progress = int(self.goal_progress.get())
+            if progress < 0 or progress > 100:
+                raise ValueError
+        except ValueError:
+            messagebox.showwarning("Предупреждение", "Прогресс должен быть числом от 0 до 100")
+            return False
+        
+        return True
+    
+    def clear_form(self):
+        """Очистка формы"""
+        self.selected_goal_id = None
+        if self.employees_data:
+            self.employee_combo.set(self.employees_data[0]['display_name'])
+        self.goal_title.delete(0, 'end')
+        self.goal_description.delete('1.0', 'end')
+        self.expected_result.delete('1.0', 'end')
+        self.goal_deadline.delete(0, 'end')
+        self.task_link.delete(0, 'end')
+        self.goal_status.set("active")
+        self.goal_progress.delete(0, 'end')
+        self.goal_progress.insert(0, "0")
+        
+        # Снимаем выделение с таблицы
+        for item in self.goals_tree.selection():
+            self.goals_tree.selection_remove(item)
+
+    def load_goals(self):
+        """Загрузка целей в таблицу"""
+        try:
+            # Очищаем таблицу
+            for item in self.goals_tree.get_children():
+                self.goals_tree.delete(item)
+            
+            # Получаем цели из базы данных
+            goals = self.db.get_all_goals()
+            goals = self.db.get_all_goals(user_id=self.current_user['id'], user_role='admin')
+            
+            # Заполняем таблицу
+            for goal in goals:
+                self.goals_tree.insert("", "end", values=(
+                    goal['id'],
+                    goal['employee_name'],
+                    goal['title'],
+                    goal['deadline'],
+                    goal['status'],
+                    f"{goal['progress']}%"
+                ))
+        except Exception as e:
+            messagebox.showerror("Ошибка", f"Не удалось загрузить цели: {str(e)}")
     
     def logout(self):
         """Выход из системы"""
