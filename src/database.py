@@ -1,3 +1,4 @@
+# database.py
 import sqlite3
 from datetime import datetime
 import hashlib
@@ -89,4 +90,3 @@ class DatabaseManager:
                 'created_at': user[3]
             }
         return None
-    

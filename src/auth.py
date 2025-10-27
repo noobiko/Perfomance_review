@@ -1,3 +1,4 @@
+# auth.py
 import hashlib
 
 class AuthManager:
