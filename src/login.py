@@ -14,6 +14,7 @@ class LoginWindow:
         self.login_window = ctk.CTkToplevel(self.root)
         self.login_window.title("Авторизация")
         self.login_window.geometry("400x400")
+        self.login_window.after(250, lambda: self.login_window.iconbitmap('pics/icon.ico'))
         self.login_window.resizable(False, False)
         self.login_window.transient(self.root)
         self.login_window.grab_set()

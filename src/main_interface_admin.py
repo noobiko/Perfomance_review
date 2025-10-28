@@ -12,7 +12,7 @@ class AdminInterface:
         self.db = db_manager
         self.current_user = current_user
         self.selected_goal_id = None
-        
+
         self.create_interface()
         self.load_employees()
         self.load_goals()

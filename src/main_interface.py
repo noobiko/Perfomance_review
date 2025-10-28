@@ -4,6 +4,8 @@ from tkinter import messagebox
 from tkinter import Text
 import sqlite3
 
+import llm_recommend
+
 class MainInterface:
     def __init__(self, root, db_manager, current_user):
         self.root = root
@@ -113,11 +115,26 @@ class MainInterface:
         
         # Кнопка обновления таблицы
         ctk.CTkButton(self.goals_frame, text="Обновить список", command=self.load_goals).pack(pady=5)
-        
-        
+
         # Настройка растягивания
         add_frame.columnconfigure(1, weight=1)
         add_frame.columnconfigure(3, weight=1)
+
+        # Вкладка рекомендаций
+        self.recommendations_frame.grid_columnconfigure(0, weight=1)
+        # self.recommendations_frame.grid_rowconfigure(0, weight=1)
+        # self.recommendations_frame.grid_rowconfigure(1, weight=1)
+
+        ctk.CTkLabel(self.recommendations_frame, text="Текст запроса:").grid(row=0, column=0, padx=5, pady=5, sticky="nsew")
+        self.promt_to_ai = ctk.CTkTextbox(self.recommendations_frame, height=10, undo=True)
+        self.promt_to_ai.grid(row=1, column=0, padx=5, pady=5, sticky="ew")
+        self.promt_to_ai.insert(0.0, "Дай рекоммендацию на основании имеющихся данных")
+
+        ctk.CTkLabel(self.recommendations_frame, text="Рекомендация:").grid(row=2, column=0, padx=5, pady=5, sticky="nsew")
+        self.recommendation = ctk.CTkTextbox(self.recommendations_frame, height=150, undo=True)
+        self.recommendation.grid(row=3, column=0, padx=5, pady=5, sticky="nsew")
+        (ctk.CTkButton(self.recommendations_frame, text="Получить рекомендацию", command=self.get_recommendation).
+         grid(row=4, column=0, columnspan=2, pady=10, sticky="nsew"))
 
     def setup_valuation_tab(self):
         """Настройка вкладки оценок"""
@@ -245,8 +262,18 @@ class MainInterface:
                 ))
         except Exception as e:
             messagebox.showerror("Ошибка", f"Не удалось загрузить цели: {str(e)}")
-    
+
+    def get_recommendation(self):
+        user_message = self.promt_to_ai.get(0.0, 'end')
+
+        answer = llm_recommend.get_chat_completion(llm_recommend.get_giga_token(), user_message)
+        answer.json()
+        result = answer.json()['choices'][0]['message']['content']
+
+        self.recommendation.delete(0.0, 'end')
+        self.recommendation.insert(0.0, result.strip())
+        print(result)
+
     def logout(self):
-        """Выход из системы"""
         if messagebox.askyesno("Подтверждение", "Вы уверены, что хотите выйти?"):
             self.root.destroy()

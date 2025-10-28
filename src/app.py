@@ -9,7 +9,9 @@ from main_interface_admin import AdminInterface
 class MainApplication:
     def __init__(self, root):
         self.root = root
+        ctk.set_default_color_theme("themes/orange.json") # установка цветовой гаммы
         self.root.title("Система управления целями сотрудников")
+        self.root.iconbitmap('pics/icon.ico')
         screen_width = self.root.winfo_screenwidth()
         screen_height = self.root.winfo_screenheight()
         self.root.geometry(f"{screen_width}x{screen_height}+0+0")
