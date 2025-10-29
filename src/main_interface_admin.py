@@ -1,10 +1,10 @@
-# main_interface_admin.py
 import customtkinter as ctk
 from tkinter import messagebox
 from tkinter import Text
 import sqlite3
 from tkinter import ttk
 from datetime import datetime
+from profile_page import ProfilePage 
 
 class AdminInterface:
     def __init__(self, root, db_manager, current_user):
@@ -25,10 +25,12 @@ class AdminInterface:
         self.notebook = ctk.CTkTabview(self.root)
         self.notebook.pack(fill='both', expand=True, padx=10, pady=10)
         
+        self.profile_frame = self.notebook.add("Профиль")
         self.goals_frame = self.notebook.add("Просмотр целей")
         self.employees_frame = self.notebook.add("Сотрудники")
         self.users_frame = self.notebook.add("Пользователи")
         
+        self.setup_profile_tab()
         self.setup_goals_tab()
         self.setup_employees_tab()
         self.setup_users_tab()
@@ -46,15 +48,17 @@ class AdminInterface:
                                  text_color="red", font=("Arial", 12, "bold"))
         role_label.pack(side='left', padx=10)
 
+    def setup_profile_tab(self):
+        """Настройка вкладки профиля для администратора"""
+        self.profile_page = ProfilePage(self.profile_frame, self.db, self.current_user)
+
     def setup_goals_tab(self):
         """Настройка вкладки просмотра целей (только просмотр для администратора)"""
-        # Заголовок с пояснением
         info_label = ctk.CTkLabel(self.goals_frame, 
                                  text="Режим просмотра: администратор может только просматрить и удалять цели", 
                                  text_color="blue", font=("Arial", 12))
         info_label.pack(pady=5)
         
-        # Таблица целей
         tree_frame = ctk.CTkFrame(self.goals_frame)
         tree_frame.pack(fill='both', expand=True, padx=10, pady=10)
         

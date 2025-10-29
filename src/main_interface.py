@@ -5,6 +5,7 @@ from tkinter import Text
 import sqlite3
 
 import llm_recommend
+from profile_page import ProfilePage
 
 class MainInterface:
     def __init__(self, root, db_manager, current_user):
@@ -23,10 +24,12 @@ class MainInterface:
         self.notebook = ctk.CTkTabview(self.root)
         self.notebook.pack(fill='both', expand=True, padx=10, pady=10)
         
-        self.goals_frame = self.notebook.add("Цели")
+        self.profile_frame = self.notebook.add("Профиль")
+        self.goals_frame = self.notebook.add("Добавить цель")
         self.valuation_frame = self.notebook.add("Оценки")
         self.recommendations_frame = self.notebook.add("Рекомендации")
         
+        self.setup_profile_tab()
         self.setup_goals_tab()
         self.setup_valuation_tab()
         self.setup_recommendations_tab()
@@ -48,7 +51,7 @@ class MainInterface:
         user_menu.pack(side='left', padx=5)
 
     def setup_goals_tab(self):
-        """Настройка вкладки целей"""
+        """Настройка вкладки добавления целей"""
         add_frame = ctk.CTkFrame(self.goals_frame)
         add_frame.pack(fill='x', padx=10, pady=5)
         
@@ -142,6 +145,9 @@ class MainInterface:
     def setup_recommendations_tab(self):
         """Настройка вкладки рекомендаций"""
 
+    def setup_profile_tab(self):
+        """Настройка вкладки профиль"""
+        self.profile_page = ProfilePage(self.profile_frame, self.db, self.current_user)
 
     def load_employees(self):
         """Загрузка списка сотрудников в комбобокс"""
@@ -151,7 +157,7 @@ class MainInterface:
             self.employee_combo.configure(values=employee_names)
             if employee_names:
                 self.employee_combo.set(employee_names[0])
-            self.employees_data = employees  # Сохраняем данные для поиска ID
+            self.employees_data = employees  
         except Exception as e:
             messagebox.showerror("Ошибка", f"Не удалось загрузить сотрудников: {str(e)}")
     
@@ -242,15 +248,12 @@ class MainInterface:
     def load_goals(self):
         """Загрузка целей в таблицу"""
         try:
-            # Очищаем таблицу
             for item in self.goals_tree.get_children():
                 self.goals_tree.delete(item)
             
-            # Получаем цели из базы данных
             goals = self.db.get_all_goals()
             goals = self.db.get_all_goals(user_id=self.current_user['id'], user_role='admin')
             
-            # Заполняем таблицу
             for goal in goals:
                 self.goals_tree.insert("", "end", values=(
                     goal['id'],
@@ -273,6 +276,58 @@ class MainInterface:
         self.recommendation.delete(0.0, 'end')
         self.recommendation.insert(0.0, result.strip())
         print(result)
+
+    def load_goal_for_editing(self, goal_id):
+        """Загрузка цели для редактирования"""
+        try:
+            goals = self.db.get_all_goals(user_id=self.current_user['id'], user_role=self.current_user['role'])
+            
+            selected_goal = None
+            for goal in goals:
+                if goal['id'] == goal_id:
+                    selected_goal = goal
+                    break
+            
+            if not selected_goal:
+                messagebox.showerror("Ошибка", "Цель не найдена")
+                return
+            
+            self.selected_goal_id = goal_id
+        
+            employee_display_name = None
+            for emp in self.employees_data:
+                if emp['id'] == selected_goal['employee_id']:
+                    employee_display_name = emp['display_name']
+                    break
+            
+            if employee_display_name:
+                self.employee_combo.set(employee_display_name)
+            
+            self.goal_title.delete(0, 'end')
+            self.goal_title.insert(0, selected_goal['title'])
+            
+            self.goal_description.delete('1.0', 'end')
+            self.goal_description.insert('1.0', selected_goal['description'] or '')
+            
+            self.expected_result.delete('1.0', 'end')
+            self.expected_result.insert('1.0', selected_goal['expected_result'] or '')
+            
+            self.goal_deadline.delete(0, 'end')
+            self.goal_deadline.insert(0, selected_goal['deadline'])
+            
+            self.task_link.delete(0, 'end')
+            self.task_link.insert(0, selected_goal['task_link'] or '')
+            
+            self.goal_status.set(selected_goal['status'])
+            
+            self.goal_progress.delete(0, 'end')
+            self.goal_progress.insert(0, str(selected_goal['progress']))
+            
+            # Меняем текст кнопки на "Обновить цель"
+            # Нужно добавить кнопку обновления в интерфейс или изменить существующую
+            
+        except Exception as e:
+            messagebox.showerror("Ошибка", f"Не удалось загрузить цель для редактирования: {str(e)}")
 
     def logout(self):
         if messagebox.askyesno("Подтверждение", "Вы уверены, что хотите выйти?"):
