@@ -1,5 +1,5 @@
 import httpx
-import json # nado?
+import json
 
 def get_giga_token():
     url = "https://ngw.devices.sberbank.ru:9443/api/v2/oauth"
@@ -63,5 +63,5 @@ def get_chat_completion(auth_token, user_message: str):
         return response
     except httpx.RequestException as e:
         # Обработка исключения в случае ошибки запроса
-        print(f"Произошла ошибка: {str(e)}")
-        return -1
+        # print(f"Произошла ошибка: {str(e)}")
+        return e

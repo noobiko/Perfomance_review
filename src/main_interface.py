@@ -1,4 +1,3 @@
-# main_interface.py
 import customtkinter as ctk
 from tkinter import messagebox
 from tkinter import Text
@@ -129,18 +128,83 @@ class MainInterface:
         # self.recommendations_frame.grid_rowconfigure(1, weight=1)
 
         ctk.CTkLabel(self.recommendations_frame, text="Текст запроса:").grid(row=0, column=0, padx=5, pady=5, sticky="nsew")
-        self.promt_to_ai = ctk.CTkTextbox(self.recommendations_frame, height=10, undo=True)
-        self.promt_to_ai.grid(row=1, column=0, padx=5, pady=5, sticky="ew")
+        options = ["GigaChat"]
+        self.llm_select = ctk.CTkComboBox(master=self.recommendations_frame, values=options)
+        self.llm_select.set("GigaChat")
+        self.llm_select.grid(row=1, column=0, pady=5, padx=5)
+
+        ctk.CTkLabel(self.recommendations_frame, text="Текст запроса:").grid(row=2, column=0, padx=5, pady=5, sticky="nsew")
+        self.promt_to_ai = ctk.CTkTextbox(self.recommendations_frame, height=20, undo=True)
+        self.promt_to_ai.grid(row=3, column=0, padx=5, pady=5, sticky="ew")
         self.promt_to_ai.insert(0.0, "Дай рекоммендацию на основании имеющихся данных")
 
-        ctk.CTkLabel(self.recommendations_frame, text="Рекомендация:").grid(row=2, column=0, padx=5, pady=5, sticky="nsew")
-        self.recommendation = ctk.CTkTextbox(self.recommendations_frame, height=150, undo=True)
-        self.recommendation.grid(row=3, column=0, padx=5, pady=5, sticky="nsew")
+        ctk.CTkLabel(self.recommendations_frame, text="Рекомендация:").grid(row=4, column=0, padx=5, pady=5, sticky="nsew")
+        self.recommendation = ctk.CTkTextbox(self.recommendations_frame, height=200, undo=True)
+        self.recommendation.grid(row=5, column=0, padx=5, pady=5, sticky="nsew")
         (ctk.CTkButton(self.recommendations_frame, text="Получить рекомендацию", command=self.get_recommendation).
-         grid(row=4, column=0, columnspan=2, pady=10, sticky="nsew"))
+         grid(row=6, column=0, columnspan=2, pady=10, sticky="nsew"))
 
     def setup_valuation_tab(self):
-        """Настройка вкладки оценок"""
+        add_frame = ctk.CTkFrame(self.valuation_frame)
+        add_frame.pack(fill='x', padx=10, pady=5)
+
+        # Выбор сотрудника для оценки
+        ctk.CTkLabel(add_frame, text="ФИО сотрудника:").grid(row=0, column=0, padx=5, pady=5, sticky="w")
+        self.valuation_employee_var = ctk.StringVar()
+        self.valuation_employee_combo = ctk.CTkComboBox(add_frame, variable=self.valuation_employee_var, width=300,
+                                                        state="readonly")
+        self.valuation_employee_combo.grid(row=1, column=0, columnspan=2, padx=5, pady=5, sticky="we")
+        employee_names = [emp['display_name'] for emp in getattr(self, 'employees_data', [])]
+        self.valuation_employee_combo.configure(values=employee_names)
+        if employee_names:
+            self.valuation_employee_combo.set(employee_names[0])
+
+        # Вопрос 1: Насколько сотруднику удалось достичь результатов
+        ctk.CTkLabel(add_frame, text="Насколько сотруднику удалось достичь результатов (0-10):").grid(row=8, column=0,
+                                                                                                      padx=5, pady=5,
+                                                                                                      sticky="w")
+        self.result_score = ctk.CTkEntry(add_frame, width=150)
+        self.result_score.grid(row=9, column=0, columnspan=4, padx=5, pady=5, sticky="w")  # Сделано по всей ширине
+
+        # Вопрос 2: Личные качества
+        ctk.CTkLabel(add_frame, text="Прокомментируй, какие личные качества помогли коллеге достичь результата:").grid(
+            row=2, column=0, padx=5, pady=5, sticky="nw")
+        self.personal_qualities = Text(add_frame, width=80, height=4, wrap="word")
+        self.personal_qualities.grid(row=3, column=0, columnspan=4, padx=5, pady=5,
+                                     sticky="we")  # Выровнено по всей ширине
+
+        # Вопрос 3: Личный вклад
+        ctk.CTkLabel(add_frame, text="Что мог бы сделать для улучшения результата:").grid(row=4, column=0, padx=5,
+                                                                                          pady=5, sticky="nw")
+        self.personal_contribution = Text(add_frame, width=80, height=4, wrap="word")
+        self.personal_contribution.grid(row=5, column=0, columnspan=4, padx=5, pady=5,
+                                        sticky="we")  # Выровнено по всей ширине
+
+        # Вопрос 5: Рекомендации
+        ctk.CTkLabel(add_frame, text="Что бы вы порекомендовали для улучшения в следующем цикле:").grid(row=6, column=0,
+                                                                                                        padx=5, pady=5,
+                                                                                                        sticky="nw")
+        self.improvement_recommendations = Text(add_frame, width=80, height=4, wrap="word")
+        self.improvement_recommendations.grid(row=7, column=0, columnspan=4, padx=5, pady=5,
+                                              sticky="we")  # Выровнено по всей ширине
+
+        # Вопрос 6: Общий рейтинг (расположить внизу, по 2 на строке)
+        ctk.CTkLabel(add_frame, text="Общий рейтинг (0-10):").grid(row=8, column=2, padx=5, pady=5, sticky="w")
+        self.overall_rating = ctk.CTkEntry(add_frame, width=150)
+        self.overall_rating.grid(row=9, column=2, padx=5, pady=5, sticky="w")
+        ctk.CTkLabel(add_frame, text="Оцените качество взаимодействия (0-10):").grid(row=8, column=1, padx=5, pady=5,
+                                                                                     sticky="w")
+        self.interaction_score = ctk.CTkEntry(add_frame, width=150)
+        self.interaction_score.grid(row=9, column=1, padx=5, pady=5, sticky="w")
+
+        # Кнопка добавления
+        ctk.CTkButton(add_frame, text="Сохранить", command=self.add_goal).grid(row=12, column=0,  padx=5, pady=5, sticky="w")
+
+        # Настройка растягивания колонок
+        add_frame.columnconfigure(0, weight=1)
+        add_frame.columnconfigure(1, weight=1)
+        add_frame.columnconfigure(2, weight=1)
+        add_frame.columnconfigure(3, weight=1)
 
     def setup_recommendations_tab(self):
         """Настройка вкладки рекомендаций"""
@@ -267,15 +331,20 @@ class MainInterface:
             messagebox.showerror("Ошибка", f"Не удалось загрузить цели: {str(e)}")
 
     def get_recommendation(self):
-        user_message = self.promt_to_ai.get(0.0, 'end')
+        if self.llm_select.get() == "GigaChat":
+            user_message = self.promt_to_ai.get(0.0, 'end')
+            answer = llm_recommend.get_chat_completion(llm_recommend.get_giga_token(), user_message)
 
-        answer = llm_recommend.get_chat_completion(llm_recommend.get_giga_token(), user_message)
-        answer.json()
-        result = answer.json()['choices'][0]['message']['content']
+            if isinstance(answer, Exception):
+                self.recommendation.delete(0.0, 'end')
+                self.recommendation.insert(0.0, f"Произошла ошибка: {str(answer)}")
+            else:
+                answer.json()
+                result = answer.json()['choices'][0]['message']['content']
 
-        self.recommendation.delete(0.0, 'end')
-        self.recommendation.insert(0.0, result.strip())
-        print(result)
+                self.recommendation.delete(0.0, 'end')
+                self.recommendation.insert(0.0, result.strip())
+                # print(result)
 
     def load_goal_for_editing(self, goal_id):
         """Загрузка цели для редактирования"""

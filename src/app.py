@@ -1,4 +1,3 @@
-# app.py
 import customtkinter as ctk
 from auth import AuthManager
 from database import DatabaseManager
