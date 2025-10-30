@@ -13,7 +13,7 @@
     "border_color": ["gray65", "gray28"]
   },
   "CTkButton": {
-    "corner_radius": 6,
+    "corner_radius": 10,
     "border_width": 0,
     "fg_color": ["#FF8C42", "#FF6505"],
     "hover_color": ["#E67320", "#CC5500"],
