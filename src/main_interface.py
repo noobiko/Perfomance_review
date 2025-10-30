@@ -5,6 +5,7 @@ import sqlite3
 
 import llm_recommend
 from profile_page import ProfilePage
+from llm_set_window import LlmSetWindow
 
 class MainInterface:
     def __init__(self, root, db_manager, current_user):
@@ -132,13 +133,13 @@ class MainInterface:
         self.llm_select = ctk.CTkComboBox(master=self.recommendations_frame, values=options)
         self.llm_select.set("GigaChat")
         self.llm_select.grid(row=1, column=0, pady=5, padx=5)
-        ctk.CTkButton(self.recommendations_frame, text="Настройки", command=self.load_goals).grid(row=2, column=0,
+        ctk.CTkButton(self.recommendations_frame, text="Настройки", command=self.show_llm_settings).grid(row=2, column=0,
                                                                                                   padx=5, pady=5)
 
         ctk.CTkLabel(self.recommendations_frame, text="Текст запроса:").grid(row=3, column=0, padx=5, pady=5, sticky="nsew")
         self.promt_to_ai = ctk.CTkTextbox(self.recommendations_frame, height=20, undo=True)
         self.promt_to_ai.grid(row=4, column=0, padx=5, pady=5, sticky="ew")
-        self.promt_to_ai.insert(0.0, "Дай рекоммендацию на основании имеющихся данных")
+        self.promt_to_ai.insert(0.0, "Дай рекоммендацию сотруднику на основании следующих данных: ")
 
         ctk.CTkLabel(self.recommendations_frame, text="Рекомендация:").grid(row=5, column=0, padx=5, pady=5, sticky="nsew")
         self.recommendation = ctk.CTkTextbox(self.recommendations_frame, height=200, undo=True)
@@ -333,8 +334,10 @@ class MainInterface:
             messagebox.showerror("Ошибка", f"Не удалось загрузить цели: {str(e)}")
 
     def get_recommendation(self):
+        evals = ""
+
         if self.llm_select.get() == "GigaChat":
-            user_message = self.promt_to_ai.get(0.0, 'end')
+            user_message = self.promt_to_ai.get(0.0, 'end') + evals
             answer = llm_recommend.get_chat_completion(llm_recommend.get_giga_token(), user_message)
 
             if isinstance(answer, Exception):
@@ -399,6 +402,9 @@ class MainInterface:
             
         except Exception as e:
             messagebox.showerror("Ошибка", f"Не удалось загрузить цель для редактирования: {str(e)}")
+
+    def show_llm_settings(self):
+        LlmSetWindow(self.root)
 
     def logout(self):
         if messagebox.askyesno("Подтверждение", "Вы уверены, что хотите выйти?"):
