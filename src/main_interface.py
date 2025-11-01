@@ -128,7 +128,7 @@ class MainInterface:
         # self.recommendations_frame.grid_rowconfigure(0, weight=1)
         # self.recommendations_frame.grid_rowconfigure(1, weight=1)
 
-        ctk.CTkLabel(self.recommendations_frame, text="Текст запроса:").grid(row=0, column=0, padx=5, pady=5, sticky="nsew")
+        ctk.CTkLabel(self.recommendations_frame, text="Нейросеть:").grid(row=0, column=0, padx=5, pady=5, sticky="nsew")
         options = ["GigaChat"]
         self.llm_select = ctk.CTkComboBox(master=self.recommendations_frame, values=options)
         self.llm_select.set("GigaChat")
