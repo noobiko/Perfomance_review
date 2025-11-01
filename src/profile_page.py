@@ -2,12 +2,13 @@ import customtkinter as ctk
 from tkinter import messagebox
 from tkinter import ttk
 
-class ProfilePage:
-    def __init__(self, parent, db_manager, current_user):
+class ProfilePage(ctk.CTkFrame):
+    def __init__(self, parent, db_manager, current_user, main_interface):
         self.parent = parent
         self.db = db_manager
         self.current_user = current_user
         self.selected_goal_id = None
+        self.main_interface = main_interface
         
         self.create_widgets()
         self.load_profile_data()
@@ -62,12 +63,17 @@ class ProfilePage:
                     font=("Arial", 16, "bold")).pack(pady=(10, 10))
         
         button_frame = ctk.CTkFrame(parent)
-        button_frame.pack(fill='x', padx=10, pady=(0, 10))  # pady=(0, 10) - отступ снизу
+        button_frame.pack(fill='x', padx=10, pady=(0, 10))  
         
         ctk.CTkButton(button_frame, text="Обновить список", 
                     command=self.load_user_goals).pack(side='left', padx=5)
         ctk.CTkButton(button_frame, text="Просмотреть цель", 
                     command=self.view_goal_details).pack(side='left', padx=5)
+        
+        #btn_goals = ctk.CTkButton(button_frame, text="Создать цель", command=self.go_to_goals)
+        #btn_goals.pack()
+        ctk.CTkButton(button_frame, text="Создать цель", 
+                    command=self.go_to_goals).pack(side='left', padx=5)
         
         tree_frame = ctk.CTkFrame(parent)
         tree_frame.pack(fill='both', expand=True, padx=10, pady=10)
@@ -90,6 +96,10 @@ class ProfilePage:
         self.goals_tree.bind('<Double-1>', lambda e: self.view_goal_details())
         self.goals_tree.bind('<ButtonRelease-1>', self.on_goal_select)
     
+    def go_to_goals(self):
+        """Создать новую цель"""
+        self.main_interface.notebook.set("Добавить цель")
+
     def load_profile_data(self):
         """Загрузка данных профиля сотрудника"""
         try:

@@ -32,6 +32,7 @@ class MainInterface:
         self.self_assessment_frame = self.notebook.add("Самооценка")
         self.feedback_frame = self.notebook.add("Обратная связь 360°")
         self.recommendations_frame = self.notebook.add("Рекомендации")
+
         
         self.setup_profile_tab()
         self.setup_goals_tab()
@@ -107,7 +108,6 @@ class MainInterface:
         tree_frame = ctk.CTkFrame(self.goals_frame)
         tree_frame.pack(fill='both', expand=True, padx=10, pady=10)
         
-        # Для таблицы продолжаем использовать ttk.Treeview, так как в customtkinter нет аналога
         from tkinter import ttk
         columns = ("ID", "Сотрудник", "Название", "Срок", "Статус", "Прогресс")
         self.goals_tree = ttk.Treeview(tree_frame, columns=columns, show="headings", height=15)
@@ -228,13 +228,20 @@ class MainInterface:
 
     def setup_profile_tab(self):
         """Настройка вкладки профиль"""
-        self.profile_page = ProfilePage(self.profile_frame, self.db, self.current_user)
+        self.profile_page = ProfilePage(self.profile_frame, self.db, self.current_user, self)
 
     def load_employees(self):
         """Загрузка списка сотрудников в комбобокс"""
         try:
             employees = self.db.get_all_employees()
-            employee_names = [emp['display_name'] for emp in employees]
+            if self.current_user['role'] == 'hr':
+                # HR видит всех сотрудников
+                employee_names = [emp['display_name'] for emp in employees]
+            else:
+                # Обычный пользователь видит только себя
+                current_emp_display_name = next((emp['display_name'] for emp in employees if emp['id'] == self.current_user['employee_id']), None)
+                employee_names = [current_emp_display_name] if current_emp_display_name else []
+
             self.employee_combo.configure(values=employee_names)
             if employee_names:
                 self.employee_combo.set(employee_names[0])
@@ -322,7 +329,6 @@ class MainInterface:
         self.goal_progress.delete(0, 'end')
         self.goal_progress.insert(0, "0")
         
-        # Снимаем выделение с таблицы
         for item in self.goals_tree.selection():
             self.goals_tree.selection_remove(item)
 
@@ -411,8 +417,6 @@ class MainInterface:
             self.goal_progress.delete(0, 'end')
             self.goal_progress.insert(0, str(selected_goal['progress']))
             
-            # Меняем текст кнопки на "Обновить цель"
-            # Нужно добавить кнопку обновления в интерфейс или изменить существующую
             
         except Exception as e:
             messagebox.showerror("Ошибка", f"Не удалось загрузить цель для редактирования: {str(e)}")
