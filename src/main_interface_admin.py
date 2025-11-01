@@ -436,6 +436,5 @@ class AdminInterface:
             messagebox.showerror("Ошибка", message)
 
     def logout(self):
-        """Выход из системы"""
         if messagebox.askyesno("Подтверждение", "Вы уверены, что хотите выйти?"):
             self.root.destroy()

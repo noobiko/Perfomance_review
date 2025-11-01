@@ -2,6 +2,10 @@ import httpx
 import json
 
 def get_giga_token():
+    with open('creds.txt', 'r') as creds_file:
+        uid = creds_file.readline().strip()
+        auth = creds_file.readline().strip()
+
     url = "https://ngw.devices.sberbank.ru:9443/api/v2/oauth"
 
     payload = {
@@ -10,8 +14,8 @@ def get_giga_token():
     headers = {
         'Content-Type': 'application/x-www-form-urlencoded',
         'Accept': 'application/json',
-        'RqUID': '',
-        'Authorization': ''
+        'RqUID': uid,
+        'Authorization': auth
     }
 
     response = httpx.request("POST", url, headers=headers, data=payload, verify=False)
