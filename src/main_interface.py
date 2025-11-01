@@ -6,6 +6,8 @@ import sqlite3
 import llm_recommend
 from profile_page import ProfilePage
 from llm_set_window import LlmSetWindow
+from evals import SelfAssessment
+from feedback import Feedback360
 
 class MainInterface:
     def __init__(self, root, db_manager, current_user):
@@ -27,11 +29,15 @@ class MainInterface:
         self.profile_frame = self.notebook.add("Профиль")
         self.goals_frame = self.notebook.add("Добавить цель")
         self.valuation_frame = self.notebook.add("Оценки")
+        self.self_assessment_frame = self.notebook.add("Самооценка")
+        self.feedback_frame = self.notebook.add("Обратная связь 360°")
         self.recommendations_frame = self.notebook.add("Рекомендации")
         
         self.setup_profile_tab()
         self.setup_goals_tab()
         self.setup_valuation_tab()
+        self.setup_evals_tab()
+        self.setup_feedback_tab()
         self.setup_recommendations_tab()
     
     def create_menu(self):
@@ -208,6 +214,14 @@ class MainInterface:
         add_frame.columnconfigure(1, weight=1)
         add_frame.columnconfigure(2, weight=1)
         add_frame.columnconfigure(3, weight=1)
+
+    def setup_evals_tab(self):
+        """Настройка вкладки Самооценки"""
+        self.self_assessment_page = SelfAssessment(self.self_assessment_frame, self.db, self.current_user)
+
+    def setup_feedback_tab(self):
+        """Настройка вкладки обратной связи 360°"""
+        self.feedback_page = Feedback360(self.feedback_frame, self.db, self.current_user)
 
     def setup_recommendations_tab(self):
         """Настройка вкладки рекомендаций"""

@@ -61,6 +61,89 @@ class DatabaseManager:
                 FOREIGN KEY (created_by) REFERENCES users (id)
             )
         ''')
+
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS tasks (
+                task_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                task_name VARCHAR(255) NOT NULL,
+                task_description TEXT,
+                leader_id INTEGER,
+                FOREIGN KEY (leader_id) REFERENCES employees (id)
+            )
+        ''')
+
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS task_participants (
+                task_id INTEGER,
+                employee_id INTEGER,
+                role VARCHAR(255),
+                PRIMARY KEY (task_id, employee_id),
+                FOREIGN KEY (task_id) REFERENCES tasks (task_id),
+                FOREIGN KEY (employee_id) REFERENCES employees (id)
+            )
+        ''')
+
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS self_assessment (
+                self_assessment_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                employee_id INTEGER,
+                task_id INTEGER,
+                result_description TEXT,
+                personal_contribution TEXT,
+                lessons_learned TEXT,
+                improvements_next_time TEXT,
+                score_interaction DECIMAL(3,2),
+                overall_satisfaction DECIMAL(3,2),
+                workspace_link TEXT,
+                created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (employee_id) REFERENCES employees (id),
+                FOREIGN KEY (task_id) REFERENCES tasks (task_id)
+            )
+        ''')
+
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS feedback360 (
+                feedback_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                assessed_employee_id INTEGER,
+                assessor_employee_id INTEGER,
+                task_id INTEGER,
+                score_result DECIMAL(3,2),
+                comments_strengths TEXT,
+                score_interaction DECIMAL(3,2),
+                suggestions_improvement TEXT,
+                created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (assessed_employee_id) REFERENCES employees (id),
+                FOREIGN KEY (assessor_employee_id) REFERENCES employees (id),
+                FOREIGN KEY (task_id) REFERENCES tasks (task_id)
+            )
+        ''')
+
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS goals_additional (
+                goal_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                task_id INTEGER,
+                goal_text TEXT,
+                deadline DATE,
+                expected_results TEXT,
+                key_tasks TEXT,
+                created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (task_id) REFERENCES tasks (task_id)
+            )
+        ''')
+
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS potential_assessment (
+                potential_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                employee_id INTEGER,
+                professional_skills_score DECIMAL(3,2),
+                personal_skills_score DECIMAL(3,2),
+                growth_desire DECIMAL(3,2),
+                successor_flag BOOLEAN,
+                risk_score DECIMAL(3,2),
+                created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (employee_id) REFERENCES employees (id)
+            )
+        ''')
         
         # Добавляем тестовых пользователей и сотрудников, если таблицы пусты
         cursor.execute("SELECT COUNT(*) FROM users")
@@ -183,6 +266,27 @@ class DatabaseManager:
             for emp in employees
         ]
     
+    def get_all_tasks(self):
+        """Получение всех задач для комбобокса"""
+        conn = sqlite3.connect(self.db_name)
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT task_id, task_name 
+            FROM tasks 
+            ORDER BY task_name
+        ''')
+        tasks = cursor.fetchall()
+        conn.close()
+        
+        return [
+            {
+                'task_id': task[0],
+                'task_name': task[1],
+                'display_name': task[1]  # Просто название задачи для комбобокса
+            }
+            for task in tasks
+        ]
+    
     def get_employee_by_id(self, employee_id):
         """Получение сотрудника по ID"""
         conn = sqlite3.connect(self.db_name)
@@ -223,6 +327,28 @@ class DatabaseManager:
             return False, f"Ошибка при создании цели: {str(e)}"
         finally:
             conn.close()
+
+    def create_self_assessment(self, employee_id, task_id, result_description, personal_contribution, 
+                          lessons_learned, improvements_next_time, score_interaction, 
+                          overall_satisfaction, workspace_link):
+        """Создание записи самооценки"""
+        try:
+            conn = sqlite3.connect(self.db_name)
+            cursor = conn.cursor()
+            
+            cursor.execute('''
+                INSERT INTO self_assessment 
+                (employee_id, task_id, result_description, personal_contribution, lessons_learned, 
+                improvements_next_time, score_interaction, overall_satisfaction, workspace_link)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (employee_id, task_id, result_description, personal_contribution, lessons_learned,
+                improvements_next_time, score_interaction, overall_satisfaction, workspace_link))
+            
+            conn.commit()
+            conn.close()
+            return True, "Самооценка успешно сохранена"
+        except Exception as e:
+            return False, f"Ошибка при сохранении самооценки: {str(e)}"
     
     def get_all_goals(self, user_id=None, user_role=None):
         """Получение всех целей с информацией о сотрудниках"""

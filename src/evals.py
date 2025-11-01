@@ -1,116 +1,18 @@
-def create_interface(self):
+import customtkinter as ctk
+from tkinter import messagebox
+from tkinter import ttk
 
-        self.notebook.add("Самооценка")
+class SelfAssessment:
+    def __init__(self, parent, db_manager, current_user):
+        self.parent = parent
+        self.db = db_manager
+        self.current_user = current_user
 
-
-        self.self_assessment_frame = self.notebook.tab("Самооценка")
-
-
-
-        self.setup_self_assessment_tab(self.self_assessment_frame)
-
-# def setup_feedback_tab(self, user_role):
-    #     """Настройка вкладки для обратной связи (руководитель и обычный сотрудник)"""
-    #     from tkinter import ttk
-    #
-    #     feedback_frame = ctk.CTkFrame(self.root)  # или ваше окно/фрейм
-    #     feedback_frame.pack(fill='both', expand=True, padx=10, pady=10)
-        #
-        # # Если роль руководитель, показываем форму оценок руководителя (setup_valuation_tab)
-        # if user_role == 'admin':
-        #     self.setup_valuation_tab()
-        #     return
-
-        # Для обычных сотрудников — форма обратной связи с множественным выбором респондентов
-
-        # # Преамбула
-        # preamble = ("Твой коллега выбрал направление задач или задачи, "
-        #             "над которыми работа(-а) в течение полугода, по результатам "
-        #             "выполнения которых просит тебя поделиться своей обратной связью.\n\n"
-        #             "Поделись обратной связью по формату:")
-        # ctk.CTkLabel(feedback_frame, text=preamble, wraplength=600, justify='left').pack(anchor='w', pady=(0, 10))
-        #
-        # # Выбор коллег (множественный выбор)
-        # ctk.CTkLabel(feedback_frame, text="Выбери коллег, по которым можешь дать обратную связь:").pack(anchor='w')
-        # colleagues = [emp['display_name'] for emp in getattr(self, 'employees_data', []) if
-        #               emp['id'] != self.current_user_employee_id]
-        # self.colleagues_var = ctk.StringVar(value=[])
-        # self.colleagues_listbox = tk.Listbox(feedback_frame, listvariable=self.colleagues_var, selectmode='multiple',
-        #                                      height=6)
-        # for c in colleagues:
-        #     self.colleagues_listbox.insert('end', c)
-        # self.colleagues_listbox.pack(fill='x', pady=5)
-        #
-        # # Кнопка выбора коллеги для оценки (показывает первый выбранный)
-        # def on_select_colleague():
-        #     selected = self.colleagues_listbox.curselection()
-        #     if not selected:
-        #         ctk.CTkLabel(feedback_frame, text="Выберите коллегу для оценки.", text_color="red").pack()
-        #         return
-        #     colleague_name = self.colleagues_listbox.get(selected[0])
-        #     self.show_task_feedback_form(feedback_frame, colleague_name)
-        #
-        # ctk.CTkButton(feedback_frame, text="Оценить выбранного коллегу", command=on_select_colleague).pack(pady=10)
-
-    # def show_task_feedback_form(self, parent_frame, colleague_name):
-    #     """Показ формы оценки для выбранного коллеги внутри заданного родителя"""
-    #     # Очистка предыдущих виджетов (кроме кнопок и списка, если есть)
-    #     for widget in parent_frame.winfo_children():
-    #         if isinstance(widget, ctk.CTkButton) or isinstance(widget, tk.Listbox):
-    #             continue
-    #         widget.destroy()
-    #
-    #     # Создаем контейнер для формы оценки
-    #     add_frame = ctk.CTkFrame(parent_frame)
-    #     add_frame.pack(fill='both', expand=True, padx=10, pady=10)
-    #
-    #     # Заголовок с именем коллеги
-    #     ctk.CTkLabel(add_frame, text=f"Оценка коллеги: {colleague_name}",
-    #                  font=ctk.CTkFont(size=16, weight="bold")).grid(row=0, column=0, columnspan=4, sticky="w",
-    #                                                                 pady=(0, 15))
-    #
-    #     # Информация о задаче
-    #     task_text = "Текст задачи, связанной с коллегой"
-    #     ctk.CTkLabel(add_frame, text=f"Задача: {task_text}", wraplength=600, justify="left"
-    #                  ).grid(row=1, column=0, columnspan=4, sticky="w", pady=(0, 15))
-    #
-    #     # 1. Балл достижения результата
-    #     ctk.CTkLabel(add_frame, text="1. Насколько удалось достичь результатов по задаче (0-10):"
-    #                  ).grid(row=2, column=0, sticky="w", pady=5)
-    #     self.result_score = ctk.CTkEntry(add_frame, width=150)
-    #     self.result_score.grid(row=3, column=0, sticky="w", pady=5, padx=(0, 20))
-    #
-    #     # 2. Личные качества (текст)
-    #     ctk.CTkLabel(add_frame, text="2. Прокомментируй, какие личные качества помогли коллеге достичь результата:"
-    #                  ).grid(row=4, column=0, sticky="nw", pady=5)
-    #     self.personal_qualities = ctk.CTkTextbox(add_frame, width=600, height=80)
-    #     self.personal_qualities.grid(row=5, column=0, columnspan=4, sticky="we", pady=5)
-    #
-    #     # 3. Качество взаимодействия (балл)
-    #     ctk.CTkLabel(add_frame, text="3. Оцени качество взаимодействия (0-10):"
-    #                  ).grid(row=6, column=0, sticky="w", pady=5)
-    #     self.interaction_score = ctk.CTkEntry(add_frame, width=150)
-    #     self.interaction_score.grid(row=7, column=0, sticky="w", pady=5, padx=(0, 20))
-    #
-    #     # 4. Рекомендации по улучшению (текст)
-    #     ctk.CTkLabel(add_frame, text="4. Что сотрудник может улучшить в своей работе по задаче в следующее полугодие:"
-    #                  ).grid(row=8, column=0, sticky="nw", pady=5)
-    #     self.improvement_recommendations = ctk.CTkTextbox(add_frame, width=600, height=80)
-    #     self.improvement_recommendations.grid(row=9, column=0, columnspan=4, sticky="we", pady=5)
-    #
-    #     # Кнопка сохранения оценки
-    #     ctk.CTkButton(add_frame, text="Сохранить обратную связь", command=self.save_peer_feedback
-    #                   ).grid(row=10, column=0, columnspan=4, sticky="w", pady=(20, 0))
-    #
-    #     # Настройка растяжения колонок
-    #     for col in range(4):
-    #         add_frame.columnconfigure(col, weight=1)
-    #     for row in range(11):
-    #         add_frame.rowconfigure(row, weight=0)
-    #
+        self.setup_self_assessment_tab(self.parent)
+        self.load_tasks()
+        
     def setup_self_assessment_tab(self, parent_frame):
         """Настройка вкладки самооценки с шаблонами ответов и оценками"""
-
         ctk.CTkLabel(parent_frame, text="Опиши результат по задаче:",
                       font=ctk.CTkFont(size=16, weight="bold")).pack(anchor='w', pady=2, padx=10)
 
@@ -162,11 +64,6 @@ def create_interface(self):
                      text="Как ты оцениваешь качество своего взаимодействия с коллегами, командой по данной задаче (0-10):"
                      ).grid(row=0, column=0, sticky='w')
 
-        # Дополнительная подсказка (если нужна) рядом в первом ряду, второй столбец
-        ctk.CTkLabel(container, font=ctk.CTkFont(size=12),
-                     text_color='gray'
-                     ).grid(row=0, column=1, sticky='w', padx=(10, 0))
-
         # Поле ввода для оценки взаимодействия в первом ряду, третий столбец
         self.score_interaction = ctk.CTkEntry(container, width=80)
         self.score_interaction.grid(row=0, column=2, sticky='w', padx=(10, 0))
@@ -188,3 +85,91 @@ def create_interface(self):
 
         ctk.CTkButton(parent_frame, text="Сохранить самооценку",
                           command=self.save_self_assessment).pack(pady=20, padx=10)
+        
+
+    def load_tasks(self):
+        """Загрузка списка задач в комбобокс"""
+        try:
+            all_tasks = self.db.get_all_tasks()
+            task_names = [task['task_name'] for task in all_tasks]
+            self.task_combo.configure(values=task_names)
+            if task_names:
+                self.task_combo.set(task_names[0])
+            self.tasks_data = all_tasks  # Сохраняем данные задач для дальнейшего использования
+        except Exception as e:
+            messagebox.showerror("Ошибка", f"Не удалось загрузить задачи: {str(e)}")
+
+    def save_self_assessment(self):
+        """Сохранение самооценки в базу данных"""
+        try:
+            # Получаем выбранную задачу
+            selected_task_name = self.task_var.get()
+            task_id = None
+            for task in self.tasks_data:
+                if task['task_name'] == selected_task_name:
+                    task_id = task['task_id']
+                    break
+            
+            if not task_id:
+                messagebox.showerror("Ошибка", "Выберите задачу")
+                return
+
+            # Получаем данные из текстовых полей
+            result_description = self.text_widgets["text_1"].get("1.0", "end-1c").strip()
+            personal_contribution = self.text_widgets["text_2"].get("1.0", "end-1c").strip()
+            lessons_learned = self.text_widgets["text_3"].get("1.0", "end-1c").strip()
+            improvements_next_time = self.text_widgets["text_4"].get("1.0", "end-1c").strip()
+
+            # Получаем оценки
+            score_interaction = self.score_interaction.get().strip()
+            overall_satisfaction = self.overall_satisfaction.get().strip()
+            workspace_link = self.workspace_link.get().strip()
+
+            # Валидация данных
+            if not all([result_description, personal_contribution, lessons_learned, improvements_next_time]):
+                messagebox.showwarning("Предупреждение", "Заполните все текстовые поля")
+                return
+
+            try:
+                score_interaction = float(score_interaction) if score_interaction else 0.0
+                overall_satisfaction = float(overall_satisfaction) if overall_satisfaction else 0.0
+                
+                if not (0 <= score_interaction <= 10) or not (0 <= overall_satisfaction <= 10):
+                    messagebox.showwarning("Предупреждение", "Оценки должны быть в диапазоне от 0 до 10")
+                    return
+            except ValueError:
+                messagebox.showwarning("Предупреждение", "Оценки должны быть числами")
+                return
+
+            # Сохраняем в базу данных
+            success, message = self.db.create_self_assessment(
+                employee_id=self.current_user.get('employee_id'),
+                task_id=task_id,
+                result_description=result_description,
+                personal_contribution=personal_contribution,
+                lessons_learned=lessons_learned,
+                improvements_next_time=improvements_next_time,
+                score_interaction=score_interaction,
+                overall_satisfaction=overall_satisfaction,
+                workspace_link=workspace_link
+            )
+
+            if success:
+                messagebox.showinfo("Успех", message)
+                self.clear_form()
+            else:
+                messagebox.showerror("Ошибка", message)
+
+        except Exception as e:
+            messagebox.showerror("Ошибка", f"Не удалось сохранить самооценку: {str(e)}")
+
+    def clear_form(self):
+        """Очистка формы после сохранения"""
+        # Очищаем текстовые поля
+        for text_widget in self.text_widgets.values():
+            text_widget.delete("1.0", "end")
+        
+        # Очищаем поля оценок
+        self.score_interaction.delete(0, "end")
+        self.overall_satisfaction.delete(0, "end")
+        self.workspace_link.delete(0, "end")
