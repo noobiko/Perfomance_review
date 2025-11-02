@@ -134,7 +134,7 @@ class MainInterface:
         # self.recommendations_frame.grid_rowconfigure(0, weight=1)
         # self.recommendations_frame.grid_rowconfigure(1, weight=1)
 
-        ctk.CTkLabel(self.recommendations_frame, text="Текст запроса:").grid(row=0, column=0, padx=5, pady=5, sticky="nsew")
+        ctk.CTkLabel(self.recommendations_frame, text="Нейросеть:").grid(row=0, column=0, padx=5, pady=5, sticky="nsew")
         options = ["GigaChat"]
         self.llm_select = ctk.CTkComboBox(master=self.recommendations_frame, values=options)
         self.llm_select.set("GigaChat")
@@ -147,11 +147,12 @@ class MainInterface:
         self.promt_to_ai.grid(row=4, column=0, padx=5, pady=5, sticky="ew")
         self.promt_to_ai.insert(0.0, "Дай рекоммендацию сотруднику на основании следующих данных: ")
 
-        ctk.CTkLabel(self.recommendations_frame, text="Рекомендация:").grid(row=5, column=0, padx=5, pady=5, sticky="nsew")
-        self.recommendation = ctk.CTkTextbox(self.recommendations_frame, height=400, undo=True)
-        self.recommendation.grid(row=6, column=0, padx=5, pady=5, sticky="nsew")
         (ctk.CTkButton(self.recommendations_frame, text="Получить рекомендацию", command=self.get_recommendation).
-         grid(row=7, column=0, columnspan=2, pady=10, sticky="nsew"))
+         grid(row=5, column=0, columnspan=2, pady=5))
+
+        ctk.CTkLabel(self.recommendations_frame, text="Рекомендация:").grid(row=6, column=0, padx=5, pady=5, sticky="nsew")
+        self.recommendation = ctk.CTkTextbox(self.recommendations_frame, height=400, undo=True)
+        self.recommendation.grid(row=7, column=0, padx=5, pady=5, sticky="nsew")
 
     def setup_valuation_tab(self):
         add_frame = ctk.CTkFrame(self.valuation_frame)
